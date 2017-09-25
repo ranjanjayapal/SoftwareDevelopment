@@ -1,6 +1,5 @@
 from classes import Gedcom_file, Individual, Family
 from datetime import datetime
-from prettytable import PrettyTable
 import operator
 def parse_single_individual(gedlist, index, xref):
     indiv = Individual(xref)
@@ -77,27 +76,48 @@ def parse_single_family(gedlist, index, xref):
                 print ""
 
     return family
+def parse_indi(lines):
+    indivi = []
+    for line in lines:
+        current_ged = Gedcom_file(line)
+        gedlist.append(current_ged)
+
+    for index, gedline in enumerate(gedlist):
+        if gedline.tag == 'INDI':
+            indivi.append(parse_single_individual(gedlist, index,
+                                                       gedline.xref))
+    return indivi
+def parse_fam(lines):
+    fami = []
+    for line in lines:
+        current_ged = Gedcom_file(line)
+        gedlist.append(current_ged)
+
+    for index, gedline in enumerate(gedlist):
+        if gedline.tag == 'FAM':
+            fami.append(parse_single_family(gedlist, index, gedline.xref))
+    return fami
+
+def birth_before_death(individuals):
+    return_flag = False
+    for individual in individuals:
+        if individual.death != None:
+            if individual.death < individual.birthdate:
+                print "Birth Date cannot be greater than Death Date"
+                return_flag = True
+    return return_flag
 
 individuals = []
 families = []
 gedlist = []
-individualTable = PrettyTable()
-individualTable.field_names = ["ID", "Name", "Gender", "Birthday","Age","Alive", "Death"]
-familyTable = PrettyTable()
-familyTable.field_names = ["ID", "Husband Name", "Wife Name", "Marriage Date", "Divorse Date"
-                           "Children"]
-
 lines = [line.rstrip('\n\r') for line in open("RanjanJayapal_FamilyGEDCOM.ged")]
-for line in lines:
-    current_ged = Gedcom_file(line)
-    gedlist.append(current_ged)
 
-for index, gedline in enumerate(gedlist):
-    if gedline.tag == 'INDI':
-        individuals.append(parse_single_individual(gedlist, index,
-                                                       gedline.xref))
-    if gedline.tag == 'FAM':
-        families.append(parse_single_family(gedlist, index, gedline.xref))
+
+# This is used for project 3 and to display the tables
+
+
+individuals = parse_indi(lines)
+families = parse_fam(lines)
 # individualTable.add_row(individuals)
 # familyTable.add_row(families)
 individuals.sort(key=operator.attrgetter('int_id'))
