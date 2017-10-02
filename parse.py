@@ -2,6 +2,7 @@ from classes import Gedcom_file, Individual, Family
 from datetime import datetime
 import operator
 from datetime import timedelta
+import re
 def parse_single_individual(gedlist, index, xref):
     indiv = Individual(xref)
     date_type = None
@@ -151,7 +152,7 @@ def birth_before_death(individuals):
     for individual in individuals:
         if individual.death != None:
             if individual.death < individual.birthdate:
-                print "ERROR: FAMILY: US03: ", individual.uid, ": Birth Date: ", individual.birthdate, " is after Death Date: ", individual.death
+                print "ERROR: INDIVIDUAL: US03: ", individual.uid, ": Birth Date: ", individual.birthdate, " is after Death Date: ", individual.death
                 return_flag = False
     return return_flag
 
@@ -206,6 +207,7 @@ def parents_Not_Too_Old(individuals, families):
                     return_flag = False
     return return_flag
 
+# US_09 for Birth Before Death of Parents (Jitendra Purohit's User Story)
 def birth_Before_Death_Of_Parents(individuals, families):
     return_flag = True
     days_In_9_Months = 266
@@ -241,6 +243,54 @@ def birth_Before_Death_Of_Parents(individuals, families):
                 print "ERROR: FAMILY: US09: ", family.uid, ":child's birthdate is after mother death date "
                 return_flag = False
     return return_flag
+
+
+# US_16 for Male last Names (Ishita Arora's User Story)
+def get_lastName(male):
+    match = re.search(r"/(.*)/", (" ".join(male.name)))
+    surname = ""
+    if match:
+        surname = match.group(1)
+    else:
+        surname = "Not specified"
+    return surname
+def male_last_names(individuals, families):
+    return_flag = True
+    for family in families:
+        males = []
+        for individual in individuals:
+            if individual.sex is "M" and (
+                family.uid in individual.famc or
+                family.uid in individual.fams):
+                males.append(individual)
+        for male in males[1:]:
+            # match = re.search(r"/(.*)/", (" ".join(male.name)))
+            # surname = ""
+            # if match:
+            #     surname = match.group(1)
+            # else:
+            #     surname = "Not specified"
+            if get_lastName(male) != get_lastName(males[0]):
+                print "ERROR: FAMILY: US16: ", family.uid, ": do not some males with the last name of ",get_lastName(males[0])
+                return_flag = False
+    return return_flag
+# US_08 Birth before marriage of parents (Isita Arora's User Story)
+def birth_before_marriage_of_parents(individuals, families):
+    days_In_9_Months = 266
+    return_flag = True
+    for individual in individuals:
+        if len(individual.famc) > 0:
+            for family in families:
+                if family.uid == individual.famc[0]:
+                    if family.marriage:
+                        if family.marriage > individual.birthdate:
+                            print "ERROR: FAMILY: US08: ", family.uid, ": child's birthdate ",individual.birthdate," is before parents marriage date ",family.marriage
+                            return_flag = False
+                    if family.marriage and family.divorce:
+                        if family.divorce < individual.birthdate - timedelta(days=days_In_9_Months):
+                            print "ERROR: FAMILY: US08: ", family.uid, ": child's birthdate ", individual.birthdate, " is more that 9 months after parents divorce date ", family.divorce
+                            return_flag = False
+    return return_flag
 individuals = []
 families = []
 gedlist = []
@@ -261,3 +311,5 @@ US_05 = marriage_before_death(families,individuals)
 
 US_12 = parents_Not_Too_Old(individuals,families)
 US_09 = birth_Before_Death_Of_Parents(individuals,families)
+US_16 = male_last_names(individuals,families)
+US_08 = birth_before_marriage_of_parents(individuals,families)
