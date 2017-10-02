@@ -1,4 +1,4 @@
-0 NOTE SoftwareDevelopment
+0 NOTE Software Development
 0 NOTE Ranjan Jayapal
 0 HEAD
 1 SOUR Family Echo
@@ -30,7 +30,7 @@
 2 _MARNM Reacher
 1 SEX F
 1 BIRT
-2 DATE 7 MAY 1952
+2 DATE 7 MAY 1916
 1 DEAT Y
 2 DATE 9 AUG 2005
 1 FAMS @F2@
@@ -50,7 +50,7 @@
 2 _MARNM Reacher
 1 SEX M
 1 BIRT
-2 DATE 5 APR 1975
+2 DATE 25 JUL 2010
 1 DEAT Y
 2 DATE 18 JUL 2010
 1 FAMS @F4@
@@ -148,6 +148,8 @@
 1 SEX F
 1 BIRT
 2 DATE 11 JUN 1987
+1 DEAT Y
+2 DATE 12 AUG 2005
 1 FAMS @F3@
 0 @I15@ INDI
 1 NAME Andrew /Clark/
