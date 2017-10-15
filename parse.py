@@ -350,7 +350,6 @@ def dates_Before_Current(individuals, families):
 
 # US_13 for Sibling Spacing (Jitendra Purohit's User Story)
 def sibling_Spacing(individuals , families):
-   def sibling_Spacing(individuals , families):
     return_flag = True
 
     for family in families:
