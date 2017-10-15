@@ -1,5 +1,5 @@
 from classes import Gedcom_file, Individual, Family
-from datetime import datetime, date
+from datetime import datetime
 import operator
 from datetime import timedelta
 import re
@@ -78,39 +78,34 @@ def parse_single_family(gedlist, index, xref):
                 print ""
 
     return family
-def create_gedList(lines):
-    gedlist = []
+def parse_indi(lines):
+    indivi = []
     for line in lines:
         current_ged = Gedcom_file(line)
         gedlist.append(current_ged)
-    return gedlist
 
-def parse_indi(lines):
-    indivi = []
-    # for line in lines:
-    #     current_ged = Gedcom_file(line)
-    #     gedlist.append(current_ged)
-    gedli = create_gedList(lines)
-    for index, gedline in enumerate(gedli):
+    for index, gedline in enumerate(gedlist):
         if gedline.tag == 'INDI':
-            indivi.append(parse_single_individual(gedli, index,
+            indivi.append(parse_single_individual(gedlist, index,
                                                        gedline.xref))
     return indivi
 def parse_fam(lines):
     fami = []
-    # for line in lines:
-    #     current_ged = Gedcom_file(line)
-    #     gedlist.append(current_ged)
-    gedli = create_gedList(lines)
-    for index, gedline in enumerate(gedli):
-        if gedline.tag == 'FAM':
-            fami.append(parse_single_family(gedli, index, gedline.xref))
+    for line in lines:
+        current_ged = Gedcom_file(line)
+        gedlist.append(current_ged)
 
+    for index, gedline in enumerate(gedlist):
+        if gedline.tag == 'FAM':
+            fami.append(parse_single_family(gedlist, index, gedline.xref))
     return fami
 
 def create_tableFor_individuals_families(individuals, families):
     # This is used for project 3 and to display the tables
+
+    print "\n"
     print 'INDIVIDUALS'.center(80, ' ')
+    print "\n"
     print '{:6s} {:20s} {:5s}  {:10s}   {:7s}  {:10s}   {:10s}' \
         .format('ID', 'Individual Name', 'Gender', 'Birthdate', 'Age', 'Alive', 'Deathdate')
     print '-' * 80
@@ -128,7 +123,9 @@ def create_tableFor_individuals_families(individuals, families):
             .format(indiv.uid, ' '.join(indiv.name), indiv.sex,
                     str(indiv.birthdate), str(age), alive, str(indiv.death))
 
+    print "\n\n"
     print 'FAMILIES'.center(80, ' ')
+    print "\n"
     print '{:6s} {:20s} {:20s} {:10.10s} {:10.10s} {}' \
         .format('ID', 'Husband', 'Wife', 'M-Date', 'D-Date',
                 '# Child')
@@ -141,11 +138,11 @@ def create_tableFor_individuals_families(individuals, families):
                 husband_name = indiv.name
             if family.wife == indiv.uid:
                 wife_name = indiv.name
-        print '{:6s} {:20s} {:20s} {:10.10s} {:10.10s} {}'\
-                .format(family.uid,' '.join(husband_name), ' '
-                        .join(wife_name),str(family.marriage),
-                        str(family.divorce),len(family.children))
-    print "\n"
+        print '{:6s} {:20s} {:20s} {:10.10s} {:10.10s} {}' \
+            .format(family.uid, ' '.join(husband_name), ' '.join(wife_name),
+                    str(family.marriage), str(family.divorce),
+                    len(family.children))
+    print "\n\n"
 
 
 
@@ -158,6 +155,9 @@ def birth_before_death(individuals):
                 print "ERROR: INDIVIDUAL: US03: ", individual.uid, ": Birth Date: ", individual.birthdate, " is after Death Date: ", individual.death
                 return_flag = False
     return return_flag
+
+# print "Error: INDIVIDUAL: US03: ",individual.uid,": Birthday ",individual.birthdate,\
+#                     " is after death date ",individual.death
 # US_05 for finding marriage_before_death (Ranjan Jayapal's User Story)
 def marriage_before_death(families, individuals):
     return_flag = True
@@ -274,7 +274,7 @@ def male_last_names(individuals, families):
                 print "ERROR: FAMILY: US16: ", family.uid, ": do not some males with the last name of ",get_lastName(males[0])
                 return_flag = False
     return return_flag
-# US_08 Birth before marriage of parents (Isita Arora's User Story)
+# US_08 Birth before marriage of parents (Ishita Arora's User Story)
 def birth_before_marriage_of_parents(individuals, families):
     days_In_9_Months = 266
     return_flag = True
@@ -319,55 +319,106 @@ def marriage_before_divorce(families):
                 return_flag = False
     return return_flag
 
+
 # US_01 for Dates before current date (Jitendra Purohit's User Story)
 def dates_Before_Current(individuals, families):
-   return_flag = True
-   today = date.today()
-   today = datetime(today.year,today.month,today.day)
-
-   
-   for individual in individuals:
-       if (individual.birthdate >= today):
-          print ("ERROR: INDIVIDUAL: US01: ",individual.uid,"with BIRTH date is after today")
-          return_flag = False
-          
-       if(individual.death is not None):
-          if (individual.death >= today):
-              print ("ERROR: INDIVIDUAL: US01: ",individual.uid,"with Death date is after today")
-              return_flag = False
-     
-          
-   for family in families:
-       if(family.marriage >= today):
-           print ("ERROR: Family: US01: ",family.uid,"with Marriage date is after today")
-           return_flag = False
-          
-       if(family.divorce is not None):
-           if(family.divorce >= today):
-               print ("ERROR: Family: US01: ",family.uid,"with Divorce date is after today")
-               return_flag = False
-   return return_flag
-
-# US_13 for Sibling Spacing (Jitendra Purohit's User Story)
-def sibling_Spacing(individuals , families):
     return_flag = True
+    today = date.today()
+    today = datetime(today.year, today.month, today.day)
+
+    for individual in individuals:
+        if (individual.birthdate >= today):
+            print("ERROR: INDIVIDUAL: US01: ", individual.uid, "with BIRTH date is after today")
+            return_flag = False
+
+        if (individual.death is not None):
+            if (individual.death >= today):
+                print("ERROR: INDIVIDUAL: US01: ", individual.uid, "with Death date is after today")
+                return_flag = False
 
     for family in families:
-        sibling_uids = family.children
-        siblings = list(x for x in individuals if x.uid in sibling_uids)
+        if (family.marriage >= today):
+            print("ERROR: Family: US01: ", family.uid, "with Marriage date is after today")
+            return_flag = False
 
-        sib_birthdays = sorted(siblings, key=lambda ind: ind.birthdate, reverse=False)
-        i=0
-        count = len(sib_birthdays)
-        while i < count-1:
-            diff = sib_birthdays[i+1].birthdate - sib_birthdays[i].birthdate
-            if (diff > timedelta(days=2) and diff < timedelta(days=243)):
-                print ("ERROR: FAMILY: US13: ",sib_birthdays[i].uid,"and",sib_birthdays[i+1].uid, "Birth dates are either more than 2 days or less than 8 months")
+        if (family.divorce is not None):
+            if (family.divorce >= today):
+                print("ERROR: Family: US01: ", family.uid, "with Divorce date is after today")
                 return_flag = False
-            i+=1
-        return return_flag
+    return return_flag
+
+
+# US_13 for Sibling Spacing (Jitendra Purohit's User Story)
+def sibling_Spacing(individuals, families):
+    def sibling_Spacing(individuals, families):
+        return_flag = True
+
+        for family in families:
+            sibling_uids = family.children
+            siblings = list(x for x in individuals if x.uid in sibling_uids)
+
+            sib_birthdays = sorted(siblings, key=lambda ind: ind.birthdate, reverse=False)
+            i = 0
+            count = len(sib_birthdays)
+            while i < count - 1:
+                diff = sib_birthdays[i + 1].birthdate - sib_birthdays[i].birthdate
+                if (diff > timedelta(days=2) and diff < timedelta(days=243)):
+                    print("ERROR: FAMILY: US13: ", sib_birthdays[i].uid, "and", sib_birthdays[i + 1].uid,
+                          "Birth dates are either more than 2 days or less than 8 months")
+                    return_flag = False
+                i += 1
+            return return_flag
+
+#US_06 Divorce before death (Ishita Arora's User Story)
+def US06_divorcebeforedeath(individuals, families):
+ return_flag = False
+ for family in families:
+     if family.divorce:
+         Husband = None
+         Wife = None
+         for individual in individuals:
+             if individual.uid == family.husband:
+                 Husband = individual
+             elif individual.uid == family.wife:
+                 Wife = individual
+         if Husband.death is not None and family.divorce > Husband.death:
+             return_flag = True
+             print ("ERROR: FAMILY: US06: ",family.uid,": Divorce Date: ",family.marriage," is after Husband Death: ",Husband.death)
+         if Wife.death is not None and family.divorce > Wife.death:
+             return_flag = True
+             print ("ERROR: FAMILY: US06: ", family.uid, ": Divorce Date: ", family.marriage, " is after Wife Death: ", Wife.death)
+ return return_flag
+
+#US_30 List of Living Marriage (Ishita Arora's User Story)
+def US30_listlivingmarried(individuals,families):
+        return_flag=True
+        for individual in individuals:
+            if len(individual.fam)>0:
+                for family in families:
+                    if family.uid==individual.famc[0]:
+                        if "marriage" in family and family["marriage"] is not None:
+                            marriage_date=datetime.strptime(family["marriage"],"%Y-%m-%d %H:%M:%S")
+                        if "husband" in family and "wife" in family:
+                            result_husband=individual(family["husband"])
+                            result_wife=individual(family["wife"])
+                            husband_alive=True
+                            wife_alive=True
+                            for hus in result_husband:
+                                if "death" in hus:
+                                    husband_alive=False
+                            for wif in result_wife:
+                                if "death" in wif:
+                                    wife_alive=False
+                            if wife_alive!=True and husband_alive!=True:
+                                US30_listlivingmarried.append(family["FAMID"])
+        unique_marr=list(set(US30_listlivingmarried()))
+        for i in unique_marr:
+            for fami in families:
+                print ("ERROR: FAMILY: US30: ", family.uid, ": Living marriage")
+
 individuals = []
 families = []
+gedlist = []
 lines = [line.rstrip('\n\r') for line in open("RanjanJayapal_FamilyGEDCOM.ged")]
 individuals = parse_indi(lines)
 families = parse_fam(lines)
@@ -377,7 +428,7 @@ families.sort(key=operator.attrgetter('int_id'))
 create_tableFor_individuals_families(individuals,families)
 
 
-print "*"*25,"Sprint 1", "*"*25,"\n"
+
 # Calling US_03 birth_before_death
 US_03 = birth_before_death(individuals)
 # Calling US_05 marriage_before_death
@@ -387,9 +438,7 @@ US_12 = parents_Not_Too_Old(individuals,families)
 US_09 = birth_Before_Death_Of_Parents(individuals,families)
 US_16 = male_last_names(individuals,families)
 US_08 = birth_before_marriage_of_parents(individuals,families)
-print "\n"
-print "*"*25,"Sprint 2", "*"*25,"\n"
-US_02 = birth_before_marriage(individuals,families)
-US_04 = marriage_before_divorce(families)
 
-print "\n"
+US_06=US06_divorcebeforedeath(individuals,families)
+US_30=US30_listlivingmarried(individuals,families)
+
