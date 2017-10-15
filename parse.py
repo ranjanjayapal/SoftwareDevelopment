@@ -350,22 +350,23 @@ def dates_Before_Current(individuals, families):
 
 # US_13 for Sibling Spacing (Jitendra Purohit's User Story)
 def sibling_Spacing(individuals , families):
+   def sibling_Spacing(individuals , families):
     return_flag = True
-    family_with_children = [x for x in families if x.children is not []]
-    
-    for family in family_with_children:
-        children_uids = family.children
-        if len(children_uids) > 1:
-            for child_uid in children_uids:
-                child = next((x for x in individuals if x.uid == child_uid), None)
-                for temp_uid in children_uids:
-                    temp_child = next((x for x in individuals if x.uid == temp_uid), None)
-                    if(child.birthdate - temp_child.birthdate < timedelta(weeks=22)):
-                        if(child.birthdate - temp_child.birthdate > timedelta(days=2)):
-                            print ("ERROR: FAMILY: US13: ", children_uids,"-", "Birth dates are either more than 2 days or less than 8 months")
-                            return_flag = False
-    return return_flag                  
 
+    for family in families:
+        sibling_uids = family.children
+        siblings = list(x for x in individuals if x.uid in sibling_uids)
+
+        sib_birthdays = sorted(siblings, key=lambda ind: ind.birthdate, reverse=False)
+        i=0
+        count = len(sib_birthdays)
+        while i < count-1:
+            diff = sib_birthdays[i+1].birthdate - sib_birthdays[i].birthdate
+            if (diff > timedelta(days=2) and diff < timedelta(days=243)):
+                print ("ERROR: FAMILY: US13: ",sib_birthdays[i].uid,"and",sib_birthdays[i+1].uid, "Birth dates are either more than 2 days or less than 8 months")
+                return_flag = False
+            i+=1
+        return return_flag
 individuals = []
 families = []
 lines = [line.rstrip('\n\r') for line in open("RanjanJayapal_FamilyGEDCOM.ged")]
