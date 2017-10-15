@@ -1,5 +1,5 @@
 from classes import Gedcom_file, Individual, Family
-from datetime import datetime
+from datetime import datetime, date
 import operator
 from datetime import timedelta
 import re
@@ -318,6 +318,53 @@ def marriage_before_divorce(families):
                 print "ERROR: FAMILY: US04: ", family.uid, ": Marriage date ", family.marriage, " is after divorce date ", family.divorce
                 return_flag = False
     return return_flag
+
+# US_01 for Dates before current date (Jitendra Purohit's User Story)
+def dates_Before_Current(individuals, families):
+   return_flag = True
+   today = date.today()
+   today = datetime(today.year,today.month,today.day)
+
+   
+   for individual in individuals:
+       if (individual.birthdate >= today):
+          print ("ERROR: INDIVIDUAL: US01: ",individual.uid,"with BIRTH date is after today")
+          return_flag = False
+          
+       if(individual.death is not None):
+          if (individual.death >= today):
+              print ("ERROR: INDIVIDUAL: US01: ",individual.uid,"with Death date is after today")
+              return_flag = False
+     
+          
+   for family in families:
+       if(family.marriage >= today):
+           print ("ERROR: Family: US01: ",family.uid,"with Marriage date is after today")
+           return_flag = False
+          
+       if(family.divorce is not None):
+           if(family.divorce >= today):
+               print ("ERROR: Family: US01: ",family.uid,"with Divorce date is after today")
+               return_flag = False
+   return return_flag
+
+# US_13 for Sibling Spacing (Jitendra Purohit's User Story)
+def sibling_Spacing(individuals , families):
+    return_flag = True
+    family_with_children = [x for x in families if x.children is not []]
+    
+    for family in family_with_children:
+        children_uids = family.children
+        if len(children_uids) > 1:
+            for child_uid in children_uids:
+                child = next((x for x in individuals if x.uid == child_uid), None)
+                for temp_uid in children_uids:
+                    temp_child = next((x for x in individuals if x.uid == temp_uid), None)
+                    if(child.birthdate - temp_child.birthdate < timedelta(weeks=22)):
+                        if(child.birthdate - temp_child.birthdate > timedelta(days=2)):
+                            print ("ERROR: FAMILY: US13: ", children_uids,"-", "Birth dates are either more than 2 days or less than 8 months")
+                            return_flag = False
+    return return_flag                  
 
 individuals = []
 families = []
