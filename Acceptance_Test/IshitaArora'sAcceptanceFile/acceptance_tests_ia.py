@@ -1,5 +1,7 @@
 import unittest
-from parse import parse_indi,parse_fam, birth_Before_Death_Of_Parents
+from parse import parse_indi,parse_fam, US31_ListLivingSingle
+from datetime import timedelta
+from datetime import datetime
 import user_stories_ia
 
 class test_user_stories(unittest.TestCase):
@@ -11,7 +13,8 @@ class test_user_stories(unittest.TestCase):
         self.assertFalse(user_stories_ia.male_last_names(individuals_pass, families_pass))
         individuals_fail = parse_indi(fail_lines)
         families_fail = parse_fam(fail_lines)
-        self.assertTrue(user_stories_ia.male_last_names(individuals_fail,families_fail))
+        self.assertTrue(user_stories_ia.male_last_names(individuals_fail, families_fail))
+
     def test_birth_before_marriage_of_parents(self):
         pass_lines = [line.rstrip('\n\r') for line in open("US08_PassFile.ged")]
         fail_lines = [line.rstrip('\n\r') for line in open("US08_FailFile.ged")]
@@ -41,6 +44,24 @@ class test_user_stories(unittest.TestCase):
         individuals_fail = parse_indi(fail_lines)
         families_fail = parse_fam(fail_lines)
         self.assertFalse(user_stories_ia.US30_listlivingmarried(individuals_fail, families_fail))
+        
+    def test_reject_illegal_dates(self):
+        pass_lines = [line.rstrip('\n\r') for line in open("US42_PassFile.ged")]
+        fail_lines = [line.rstrip('\n\r') for line in open("US42_FailFile.ged")]
+        individuals_pass = parse_indi(pass_lines)
+        families_pass = parse_fam(pass_lines)
+        self.assertFalse(user_stories_ia.US42_RejectIllegalDates(individuals_pass, families_pass))
+        individuals_fail = parse_indi(fail_lines)
+        families_fail = parse_fam(fail_lines)
+        self.assertTrue(user_stories_ia.US42_RejectIllegalDates(individuals_fail,families_fail))
+
+    def test_list_living_single(self):
+        pass_lines = [line.rstrip('\n\r') for line in open("US31_PassFile.ged")]
+        fail_lines = [line.rstrip('\n\r') for line in open("US31_FailFile.ged")]
+        individuals_pass = parse_indi(pass_lines)
+        self.assertTrue(user_stories_ia.US31_ListLivingSingle(individuals_pass))
+        individuals_fail = parse_indi(fail_lines)
+        self.assertFalse(user_stories_ia.US31_ListLivingSingle(individuals_fail))
 
 if __name__ == '__main__':
     unittest.main()
