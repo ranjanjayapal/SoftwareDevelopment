@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+@author: jiten
+"""
+
 from datetime import date, datetime
 from datetime import timedelta
+from collections import Counter
 
 def parents_Not_Too_Old(individuals, families):
     return_flag = True
@@ -111,3 +117,42 @@ def sibling_Spacing(individuals , families):
                 return_flag = False
             i+=1
         return return_flag
+    
+# US_14 for Multiple Births less than 5 (Jitendra Purohit's User Story)
+def multiple_Births_Less_5(individuals,families):
+    return_flag = True
+
+    for family in families:
+        sibling_uids = family.children
+        siblings = list(x for x in individuals if x.uid in sibling_uids)
+        sib_birthdays = []
+        for sibling in siblings:
+            sib_birthdays.append(sibling.birthdate)
+        result = Counter(sib_birthdays).most_common(1)
+        for (a,b) in result:
+            if b > 5:
+                print ("ERROR: INDIVIDUAL: US14: ",family.uid,": More than 5 siblings born at once")
+                return_flag = False
+
+    return return_flag
+
+# US_22 Unique ID's (Jitendra Purohit's User Story)
+def unique_Ids(individuals, families):
+    return_flag = True
+
+    individual_list = []
+    family_list = []
+
+    for individual in individuals:
+        if individual.uid in individual_list:
+            print ("ERROR: INDIVIDUAL: US22: ",individual.uid,":Individual ID already exists")
+            return_flag = False
+        else:
+            individual_list.append(individual.uid)
+    for family in families:
+        if family.uid in family_list:
+            print ("ERROR: INDIVIDUAL: US22: ",family.uid,":Family ID already exists")
+            return_flag = False
+        else:
+            family_list.append(family.uid)
+    return return_flag
