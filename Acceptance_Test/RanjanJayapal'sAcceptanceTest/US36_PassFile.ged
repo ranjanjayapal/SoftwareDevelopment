@@ -1,0 +1,45 @@
+0 @I4@ INDI
+1 NAME Jacob /Reacher/
+2 GIVN Jacob
+2 SURN Reacher
+2 _MARNM Reacher
+1 SEX M
+1 BIRT
+2 DATE 25 JUL 2010
+1 DEAT Y
+2 DATE 7 NOV 2017
+1 FAMS @F4@
+1 FAMC @F2@
+0 @I16@ INDI
+1 NAME Andrew /Reacher/
+2 GIVN Andrew
+2 SURN Clark
+2 _MARNM Clark
+1 SEX M
+1 BIRT
+2 DATE 26 APR 1999
+1 DEAT
+2 DATE 17 OCT 2018
+1 FAMC @F7@
+0 @I21@ INDI
+1 NAME rname /tname/
+2 GIVN rname
+2 SURN tname
+2 _MARNM tname
+1 SEX F
+1 BIRT
+2 DATE 20 JUL 2000
+1 DEAT
+2 DATE 5 NOV 2017
+1 FAMC @F4@
+0 @I22@ INDI
+1 NAME tname /yname/
+2 GIVN tname
+2 SURN yname
+2 _MARNM yname
+1 SEX F
+1 BIRT
+2 DATE 20 JUL 2000
+1 DEAT
+2 DATE 2 NOV 2017
+1 FAMC @F4@
