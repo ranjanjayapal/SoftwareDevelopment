@@ -1,0 +1,28 @@
+0 @I25@ INDI
+1 NAME nname /mname/
+2 GIVN nname
+2 SURN mname
+2 _MARNM mname
+1 SEX M
+1 BIRT
+2 DATE 11 APR 1975
+1 FAMS @I26@
+0 @I26@ INDI
+1 NAME zname /mname/
+2 GIVN zname
+2 SURN bname
+2 _MARNM mname
+1 SEX F
+1 BIRT
+2 DATE 11 DEC 1975
+1 FAMS @I25@
+1 FAMS @I27@
+0 @F8@ FAM
+1 HUSB @I25@
+1 WIFE @I26@
+1 CHIL @I25@
+1 MARR
+2 DATE 15 JAN 2000
+2 PLAC jersey
+1 _CURRENT Y
+0 TRLR

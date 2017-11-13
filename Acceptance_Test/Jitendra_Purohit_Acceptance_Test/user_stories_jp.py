@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-@author: jiten
-"""
-
-from datetime import date, datetime
-from datetime import timedelta
+from datetime import timedelta, date,datetime
 from collections import Counter
-
+# US_12 for Parents not too old (Jitendra Purohit's User Story)
 def parents_Not_Too_Old(individuals, families):
     return_flag = True
     days_In_60_Years = 21900
@@ -34,90 +28,62 @@ def parents_Not_Too_Old(individuals, families):
                     print "ERROR: FAMILY: US12: ", family.uid, ": Father", father.uid, " is 80 years greater than child ", child.uid
                     return_flag = False
     return return_flag
+
+# US_09 for Birth Before Death of Parents (Jitendra Purohit's User Story)
 def birth_Before_Death_Of_Parents(individuals, families):
     return_flag = True
     days_In_9_Months = 266
 
-    for individual in individuals:
+    for family in families:
+        husb = family.husband
+        wife = family.wife
+        children = family.children
+        husb_dday = None
+        wife_dday = None
+        for individual in individuals:
+            if individual.uid == husb:
+                husb_dday = individual.death
+            elif individual.uid == wife:
+                wife_dday = individual.death
+        for individual in individuals:
+            if individual.uid in children:
+                if husb_dday is not None and (individual.birthdate - husb_dday) < timedelta(days = days_In_9_Months):
+                    print "ERROR: FAMILY: US09: ", individual.uid, " was born after death of father"
+                    return_flag = False
+                elif wife_dday is not None and (individual.birthdate - wife_dday) < timedelta(days = days_In_9_Months):
+                    print "ERROR: FAMILY: US09: ", individual.uid, " was born after death of mother"
+                    return_flag = False
 
-        if len(individual.famc) > 0:
-            father = None
-            father_id = None
-            mother = None
-            mother_id = None
-            fam = None
-
-            for family in families:
-                if family.uid == individual.famc[0]:
-                    father_id = family.husband
-                    mother_id = family.wife
-                    fam = family
-                    break
-
-            for each in individuals:
-                if each.uid == father_id:
-                    father = each
-                if each.uid == mother_id:
-                    mother = each
-
-            if father.death is not None and \
-                father.death < individual.birthdate - timedelta(days = days_In_9_Months):
-                print "ERROR: FAMILY: US09: ",family.uid,":child's birthdate is more than 9 months after Death of Father "
-                return_flag = False
-
-            if mother.death is not None and mother.death < individual.birthdate:
-                print "ERROR: FAMILY: US09: ", family.uid, ":child's birthdate is after mother death date "
-                return_flag = False
     return return_flag
+
 
 # US_01 for Dates before current date (Jitendra Purohit's User Story)
 def dates_Before_Current(individuals, families):
-   return_flag = True
-   today = date.today()
-   today = datetime(today.year,today.month,today.day)
-
-   
-   for individual in individuals:
-       if (individual.birthdate >= today):
-          print ("ERROR: INDIVIDUAL: US01: ",individual.uid,"with BIRTH date is after today")
-          return_flag = False
-          
-       if(individual.death is not None):
-          if (individual.death >= today):
-              print ("ERROR: INDIVIDUAL: US01: ",individual.uid,"with Death date is after today")
-              return_flag = False
-     
-          
-   for family in families:
-       if(family.marriage >= today):
-           print ("ERROR: Family: US01: ",family.uid,"with Marriage date is after today")
-           return_flag = False
-          
-       if(family.divorce is not None):
-           if(family.divorce >= today):
-               print ("ERROR: Family: US01: ",family.uid,"with Divorce date is after today")
-               return_flag = False
-   return return_flag
-
-# US_13 for Sibling Spacing (Jitendra Purohit's User Story)
-def sibling_Spacing(individuals , families):
     return_flag = True
+    today = date.today()
+    today = datetime(today.year, today.month, today.day)
+
+    for individual in individuals:
+        if (individual.birthdate >= today):
+            print "ERROR: INDIVIDUAL: US01: ", individual.uid, "with BIRTH date",individual.birthdate," is after today",today
+            return_flag = False
+
+        if (individual.death is not None):
+            if (individual.death >= today):
+                print "ERROR: INDIVIDUAL: US01: ", individual.uid, "with Death date",individual.death," is after today",today
+                return_flag = False
 
     for family in families:
-        sibling_uids = family.children
-        siblings = list(x for x in individuals if x.uid in sibling_uids)
+        if (family.marriage >= today):
+            print "ERROR: Family: US01: ", family.uid, "with Marriage date", family.marriage," is after today",today
+            return_flag = False
 
-        sib_birthdays = sorted(siblings, key=lambda ind: ind.birthdate, reverse=False)
-        i=0
-        count = len(sib_birthdays)
-        while i < count-1:
-            diff = sib_birthdays[i+1].birthdate - sib_birthdays[i].birthdate
-            if (diff > timedelta(days=2) and diff < timedelta(days=243)):
-                print ("ERROR: FAMILY: US13: ",sib_birthdays[i].uid,"and",sib_birthdays[i+1].uid, "Birth dates are either more than 2 days or less than 8 months")
+        if (family.divorce is not None):
+            if (family.divorce >= today):
+                print "ERROR: Family: US01: ", family.uid, "with Divorce date", family.divorce," is after today",today
                 return_flag = False
-            i+=1
-        return return_flag
-    
+    return return_flag
+
 # US_14 for Multiple Births less than 5 (Jitendra Purohit's User Story)
 def multiple_Births_Less_5(individuals,families):
     return_flag = True
@@ -155,4 +121,50 @@ def unique_Ids(individuals, families):
             return_flag = False
         else:
             family_list.append(family.uid)
+    return return_flag
+
+# US_13 for Sibling Spacing (Jitendra Purohit's User Story)
+def sibling_Spacing(individuals, families):
+    return_flag = True
+    for family in families:
+        sibling_uids = family.children
+        siblings = list(x for x in individuals if x.uid in sibling_uids)
+        sib_birthdays = sorted(siblings, key=lambda ind: ind.birthdate, reverse=False)
+        i = 0
+        count = len(sib_birthdays)
+        while i < count - 1:
+            diff = sib_birthdays[i + 1].birthdate - sib_birthdays[i].birthdate
+            if (diff > timedelta(days=2) and diff < timedelta(days=243)):
+                print "ERROR: FAMILY: US13: ", sib_birthdays[i].uid, "and", sib_birthdays[i + 1].uid, "Birth dates are either more than 2 days or less than 8 months"
+                return_flag = False
+            i += 1
+    return return_flag
+# US_17 No marriage to descendents (Jitendra Purohit's User Story)
+def no_Marriage_To_Decendants(individuals, families):
+    return_flag = True
+    print "\n"
+    for family in families:
+        husb = family.husband
+        wife = family.wife
+        decendants = family.children
+        for individual in individuals:
+            if individual.uid in decendants:
+                if husb in individual.fams:
+                    return_flag = False
+                    print "ERROR: INDIVIDUAL: US17: ",husb," was married to a decendent"
+                elif wife in individual.fams:
+                    return_flag = False
+                    print "ERROR: INDIVIDUAL: US17: ",wife," was married to a decendent"
+    return return_flag
+
+# US_18 Siblings should not marry (Jitendra Purohit's User Story)
+def no_Sibling_Marriage(individuals, families):
+    return_flag = True
+    for family in families:
+        children = family.children
+        for individual in individuals:
+            if individual.uid in children:
+                if len(individual.fams)>0 and individual.fams[0] in children:
+                    return_flag = False
+                    print "ERROR: INDIVIDUAL: US18:",individual.uid," siblings are married"
     return return_flag
